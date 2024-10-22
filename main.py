@@ -3,13 +3,15 @@ import sys
 
 def get_env_vars(input_args=None):
   """
-  Retrieves and categorizes environment variables and includes script arguments with positions.
+  Retrieves and categorizes environment variables, includes script arguments with 
+  positions, and lists files in /input.
 
   Args:
     input_args: A list of command-line arguments.
 
   Returns:
-    A string containing categorized environment variables and formatted arguments.
+    A string containing categorized environment variables, formatted arguments, 
+    and the list of files in /input.
   """
   system_vars = {}
   user_vars = {}
@@ -33,6 +35,15 @@ def get_env_vars(input_args=None):
     output += "\n## Script Arguments:\n"
     for i, arg in enumerate(input_args):
       output += f"Argument {i+1}: {arg}\n"
+
+  # Add the list of files in /input
+  try:
+    input_files = os.listdir("/input")
+    output += "\n## Files in /input:\n"
+    for file in input_files:
+      output += f"  - {file}\n"
+  except FileNotFoundError:
+    output += "\n## /input directory not found.\n"
 
   return output
 
