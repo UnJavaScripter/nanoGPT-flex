@@ -5,23 +5,33 @@ import time
 import http.server
 import socketserver
 import threading
+import subprocess
 
 # Constants
 USERNAME = "your_username"  # Replace with the remote machine username
 PASSWORD = "your_password"  # Replace with the password
 PORT = 22  # Default SSH port
 
-# Function to get the IP of the remote host
+# Function to get the IP of the remote host using system tools
 def get_remote_ip():
-    # Replace with the command or method to get the remote host IP dynamically
-    # For example, querying a cloud provider's API or using a hostname lookup
-    return socket.gethostbyname('your_remote_host_hostname')  # Replace 'your_remote_host_hostname' with the appropriate hostname
+    try:
+        # Using a system command to determine the IP address dynamically
+        ip_command = "hostname -I"
+        result = subprocess.run(ip_command, shell=True, capture_output=True, text=True)
+        ip = result.stdout.strip().split()[0]  # Assuming the first IP is the correct one
+        return ip
+    except Exception as e:
+        print(f"Failed to get the IP address: {e}")
+        return None
 
 # Function to connect via SSH and set the environment variable
 def set_debian_frontend():
     try:
         # Get the dynamic IP of the host
         HOST = get_remote_ip()
+        if not HOST:
+            print("Unable to determine the IP address.")
+            return
         
         # Create SSH client
         ssh_client = paramiko.SSHClient()
@@ -52,11 +62,17 @@ def set_debian_frontend():
         
         print(f"Setup complete. You can access the remote host via: http://{HOST}:8080")
         
+        # Wait for 5 minutes before closing the SSH connection
+        print("Waiting for 5 minutes before closing the connection...")
+        time.sleep(300)
+        
     except (paramiko.AuthenticationException, socket.error) as e:
         print(f"Connection failed: {e}")
     finally:
         # Close the SSH connection
         ssh_client.close()
+        print("SSH connection closed.")
+        exit(0)
 
 if __name__ == "__main__":
     set_debian_frontend()
