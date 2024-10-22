@@ -4,14 +4,15 @@ import sys
 def get_env_vars(input_args=None):
   """
   Retrieves and categorizes environment variables, includes script arguments with 
-  positions, and lists files in /input.
+  positions, lists files in /input, and lists files in the directory specified 
+  by the PYENV_DIR environment variable.
 
   Args:
     input_args: A list of command-line arguments.
 
   Returns:
     A string containing categorized environment variables, formatted arguments, 
-    and the list of files in /input.
+    the list of files in /input, and the list of files in PYENV_DIR.
   """
   system_vars = {}
   user_vars = {}
@@ -44,6 +45,19 @@ def get_env_vars(input_args=None):
       output += f"  - {file}\n"
   except FileNotFoundError:
     output += "\n## /input directory not found.\n"
+
+  # Add the list of files in PYENV_DIR
+  pyenv_dir = os.environ.get("PYENV_DIR")
+  if pyenv_dir:
+    try:
+      pyenv_files = os.listdir(pyenv_dir)
+      output += f"\n## Files in PYENV_DIR ({pyenv_dir}):\n"
+      for file in pyenv_files:
+        output += f"  - {file}\n"
+    except FileNotFoundError:
+      output += f"\n## PYENV_DIR directory not found ({pyenv_dir}).\n"
+  else:
+    output += "\n## PYENV_DIR environment variable not set.\n"
 
   return output
 
